@@ -14,16 +14,6 @@ logging.debug("The log level is set to: " + LOGLEVEL)
 app = Flask(__name__)
 
 
-class HealthCheckView(MethodView):
-    def get(self):
-        result = {
-            "status": "ok",
-            "timestamp": time.time()
-        }
-
-        return result
-
-
 class TranscribeView(MethodView):
 
     def __init__(self):
@@ -31,6 +21,7 @@ class TranscribeView(MethodView):
         self.logger = logging.getLogger(__name__)
 
     def post(self):
+        _start_time = time.time()
         self.logger.info("Transcribing audio")
         json_data = request.form or request.get_json()
         data = dict(json_data)
@@ -49,16 +40,34 @@ class TranscribeView(MethodView):
         # Summarize the transcript
         summary = self.summarizer.summarize(transcript)
 
+        _end_time = time.time()
+
         results = {
             "transcript": transcript,
-            "summary": summary
+            "summary": summary,
+            "time_taken": _end_time - _start_time,
         }
 
         return results
 
 
 app.add_url_rule('/transcribe', view_func=TranscribeView.as_view('transcribe'))
-app.add_url_rule('/health', view_func=HealthCheckView.as_view('health'))
+
+
+@app.route('/health', methods=['GET'])
+def health_check():
+    result = {
+        "status": "ok",
+        "timestamp": time.time()
+    }
+
+    return result
+
+
+@app.route('/', methods=['GET'])
+def home():
+    return {}
+
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5006)

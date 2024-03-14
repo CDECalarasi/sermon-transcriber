@@ -12,6 +12,8 @@ export_folder = os.environ.get("EXPORT_FOLDER", "./temp")
 
 class Transcriber(OpenAIMixin):  # Mixin included
     def __init__(self, file_instance: str):
+        super().__init__()
+
         # Initialize mixin
         self.initialize_openai()
         self.file_instance = file_instance
@@ -52,7 +54,7 @@ class Transcriber(OpenAIMixin):  # Mixin included
     def use_or_download_file(self, filepath: str, name: str = None):
         self.create_files_folder()
 
-        # check if the file if local or remote
+        # check if the file is local or remote
         if filepath.startswith("http"):
             # download the file
             audio_file = requests.get(filepath)
@@ -104,6 +106,7 @@ class Transcriber(OpenAIMixin):  # Mixin included
         files = [f for f in os.listdir(self.local_folder)]
         for f in files:
             os.remove(f"{self.local_folder}/{f}")
+        self.logger.info(f"Export folder cleaned at {self.local_folder}")
 
     def create_files_folder(self):
         self.logger.debug("Creating export folder")
