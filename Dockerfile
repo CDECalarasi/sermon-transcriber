@@ -3,7 +3,7 @@ LABEL authors="andrewmurray"
 
 
 # Install required packages
-RUN apt-get update && apt-get install -y \
+RUN apt update && apt install -y \
     python3 \
     python3-pip \
     python3-dev \
@@ -12,7 +12,11 @@ RUN apt-get update && apt-get install -y \
     libffi-dev \
     python3-setuptools \
     python3-venv \
-    && apt-get clean
+    && apt clean
+
+# Install ffmpeg
+RUN apt install -y ffmpeg
+
 
 # Create a directory where the code will live \
 RUN mkdir -p /usr/src/app
