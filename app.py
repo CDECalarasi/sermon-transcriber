@@ -27,7 +27,6 @@ class HealthCheckView(MethodView):
 class TranscribeView(MethodView):
 
     def __init__(self):
-        self.transcriber = Transcriber()
         self.summarizer = Summarizer()
         self.logger = logging.getLogger(__name__)
 
@@ -41,8 +40,11 @@ class TranscribeView(MethodView):
         # Get the audio file
         audio_file = data.get("webContentLink")
         file_name = data.get("name")
+        md5 = data.get("md5Checksum")
 
-        transcript = self.transcriber.transcribe(audio_file, file_name)
+        transcriber = Transcriber(md5)
+
+        transcript = transcriber.transcribe(audio_file, file_name)
 
         # Summarize the transcript
         summary = self.summarizer.summarize(transcript)

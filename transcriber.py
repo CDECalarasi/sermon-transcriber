@@ -11,12 +11,14 @@ export_folder = os.environ.get("EXPORT_FOLDER", "./temp")
 
 
 class Transcriber(OpenAIMixin):  # Mixin included
-    def __init__(self):
+    def __init__(self, file_instance: str):
         # Initialize mixin
         self.initialize_openai()
+        self.file_instance = file_instance
         self.transcription_data = {}
         self.transcripts = []
         self.logger = logging.getLogger(__name__)
+        self.local_folder = f"{export_folder}/{self.file_instance}"
 
     def split_audio(self, file_path, chunk_length_ms=480000):  # 8 minutes in milliseconds
         self.logger.info("Splitting audio")
@@ -37,7 +39,7 @@ class Transcriber(OpenAIMixin):  # Mixin included
             chunk = audio[start_ms:end_ms]
 
             # Save the chunk to a new file
-            chunk_name = f"{export_folder}/chunk{i}.mp3"  # Change the extension based on your needs
+            chunk_name = f"{self.local_folder}/chunk{i}.mp3"  # Change the extension based on your needs
             chunk.export(chunk_name, format="mp3")
             audio_file = open(chunk_name, "rb")
 
@@ -48,7 +50,7 @@ class Transcriber(OpenAIMixin):  # Mixin included
         return chunks
 
     def use_or_download_file(self, filepath: str, name: str = None):
-        self.create_export_folder()
+        self.create_files_folder()
 
         # check if the file if local or remote
         if filepath.startswith("http"):
@@ -59,10 +61,10 @@ class Transcriber(OpenAIMixin):  # Mixin included
             self.logger.info(f"Downloading file {file_name}")
 
             # save the file to a local folder
-            with open(f"{export_folder}/{file_name}", "wb") as f:
+            with open(f"{self.local_folder}/{file_name}", "wb") as f:
                 f.write(audio_file.content)
 
-            audio_file = open(f"{export_folder}/{file_name}", "rb")
+            audio_file = open(f"{self.local_folder}/{file_name}", "rb")
         else:
             audio_file = open(filepath, "rb")
 
@@ -91,20 +93,20 @@ class Transcriber(OpenAIMixin):  # Mixin included
         for transcript in transcripts:
             full_transcript += transcript.text
 
-        self.clean_export_folder()
+        self.clean_files_folder()
 
         self.logger.debug(f"Full transcript: {full_transcript}")
 
         return full_transcript
 
-    def clean_export_folder(self):
+    def clean_files_folder(self):
         self.logger.debug("Cleaning export folder")
-        files = [f for f in os.listdir(export_folder)]
+        files = [f for f in os.listdir(self.local_folder)]
         for f in files:
-            os.remove(f"{export_folder}/{f}")
+            os.remove(f"{self.local_folder}/{f}")
 
-    def create_export_folder(self):
+    def create_files_folder(self):
         self.logger.debug("Creating export folder")
-        if not os.path.exists(export_folder):
-            os.makedirs(export_folder)
-            self.logger.info(f"Export folder created at {export_folder}")
+        if not os.path.exists(self.local_folder):
+            os.makedirs(self.local_folder)
+            self.logger.info(f"Export folder created at {self.local_folder}")
