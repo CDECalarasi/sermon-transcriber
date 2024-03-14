@@ -49,4 +49,4 @@ app.add_url_rule('/transcribe', view_func=TranscribeView.as_view('transcribe'))
 app.add_url_rule('/health', view_func=HealthCheckView.as_view('health'))
 
 if __name__ == '__main__':
-    app.run()
+    app.run(host='0.0.0.0', port=5006)
