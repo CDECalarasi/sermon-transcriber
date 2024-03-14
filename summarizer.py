@@ -1,4 +1,5 @@
 from mixins.openai import OpenAIMixin
+import logging
 
 _sum = """The Sermon MAIN POINT (only one), Sermon applications (what could be applied from the sermon into one's day 
 to day life), main ideas (no less than 3, no more than 5), a summary (intro, main content and conclusion; sparing no 
@@ -16,10 +17,11 @@ class Summarizer(OpenAIMixin):  # Mixin included
     def __init__(self):
         # Initialize mixin
         self.initialize_openai()
+        self.logger = logging.getLogger(__name__)
 
     def summarize(self, content):
         try:
-            print("Trying to summarize: ", content)
+            self.logger.info("Trying to summarize: ", content)
 
             completion = self.client.chat.completions.create(
                 # model="gpt-4",
