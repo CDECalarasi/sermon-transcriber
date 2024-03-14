@@ -93,7 +93,7 @@ class Transcriber(OpenAIMixin):  # Mixin included
 
         self.clean_export_folder()
 
-        self.logger.debug("Full transcript: ", full_transcript)
+        self.logger.debug(f"Full transcript: {full_transcript}")
 
         return full_transcript
 

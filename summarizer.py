@@ -21,7 +21,7 @@ class Summarizer(OpenAIMixin):  # Mixin included
 
     def summarize(self, content):
         try:
-            self.logger.info("Trying to summarize: ", content)
+            self.logger.info(f"Trying to summarize: {content}")
 
             completion = self.client.chat.completions.create(
                 # model="gpt-4",
