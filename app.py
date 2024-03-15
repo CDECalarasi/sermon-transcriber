@@ -1,3 +1,4 @@
+import json
 import time
 import logging
 import os
@@ -39,12 +40,14 @@ class TranscribeView(MethodView):
 
         # Summarize the transcript
         summary = self.summarizer.summarize(transcript)
+        # parse the summary into a json object, from string
+        summary_json = json.loads(summary)
 
         _end_time = time.time()
 
         results = {
             "transcript": transcript,
-            "summary": summary,
+            "summary": summary_json,
             "time_taken": _end_time - _start_time,
         }
 
