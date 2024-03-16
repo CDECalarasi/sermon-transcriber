@@ -15,6 +15,38 @@ logging.debug("The log level is set to: " + LOGLEVEL)
 app = Flask(__name__)
 
 
+class SummarizerView(MethodView):
+
+    def __init__(self):
+        self.summarizer = Summarizer()
+        self.logger = logging.getLogger(__name__)
+
+    def post(self):
+        _start_time = time.time()
+        self.logger.info("Summarizing transcript")
+        json_data = request.form or request.get_json()
+        data = dict(json_data)
+
+        self.logger.debug(f"Received data: {data}")
+
+        # Get the audio file
+        transcript = data.get("transcript")
+
+        summary = self.summarizer.summarize(transcript)
+        # parse the summary into a json object, from string
+        summary_json = json.loads(summary)
+
+        _end_time = time.time()
+
+        results = {
+            "transcript": transcript,
+            "summary": summary_json,
+            "time_taken": _end_time - _start_time,
+        }
+
+        return results
+
+
 class TranscribeView(MethodView):
 
     def __init__(self):
@@ -37,17 +69,10 @@ class TranscribeView(MethodView):
         transcriber = Transcriber(md5)
 
         transcript = transcriber.transcribe(audio_file, file_name)
-
-        # Summarize the transcript
-        summary = self.summarizer.summarize(transcript)
-        # parse the summary into a json object, from string
-        summary_json = json.loads(summary)
-
         _end_time = time.time()
 
         results = {
             "transcript": transcript,
-            "summary": summary_json,
             "time_taken": _end_time - _start_time,
         }
 
@@ -55,6 +80,7 @@ class TranscribeView(MethodView):
 
 
 app.add_url_rule('/transcribe', view_func=TranscribeView.as_view('transcribe'))
+app.add_url_rule('/summarize', view_func=SummarizerView.as_view('summarize'))
 
 
 @app.route('/health', methods=['GET'])
